@@ -9,6 +9,10 @@ import axios from "axios";
 import { useAuth, UserRole } from "../../contexts/AuthContext";
 import { toast } from "sonner";
 
+// Define the fixed admin credentials
+const ADMIN_USERNAME = "admin@foodfusion.com";
+const ADMIN_PASSWORD = "admin123";
+
 const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -21,7 +25,8 @@ const LoginPage = () => {
     // Parse the role from the URL query parameter, defaulting to "customer"
     const query = new URLSearchParams(location.search);
     const defaultRole = (query.get("role") as UserRole) || "customer";
-    const [role, setRole] = useState<UserRole>(defaultRole);
+    // Add 'admin' as a possible role
+    const [role, setRole] = useState<UserRole | "admin">(defaultRole);
 
     const { setUser, setIsAuthenticated } = useAuth();
 
@@ -37,6 +42,29 @@ const LoginPage = () => {
             return;
         }
 
+        // Handle admin login locally
+        if (role === "admin") {
+            if (email === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                const userData = {
+                    id: "admin",
+                    name: "Admin",
+                    email: ADMIN_USERNAME,
+                    role: "admin"
+                };
+                sessionStorage.setItem("foodFusionUser", JSON.stringify(userData));
+                setUser(userData);
+                setIsAuthenticated(true);
+                toast.success("Welcome, Admin!");
+                navigate("/admin");
+            } else {
+                setLoginError("Invalid admin credentials");
+                toast.error("Invalid admin credentials");
+            }
+            setIsLoading(false);
+            return;
+        }
+
+        // Normal login for other roles
         try {
             const response = await axios.post("http://localhost:5000/api/auth/login", {
                 email,
@@ -46,8 +74,8 @@ const LoginPage = () => {
 
             const userData = response.data.user;
 
-            // Save to localStorage
-            localStorage.setItem("foodFusionUser", JSON.stringify(userData));
+            // Save to sessionStorage for tab isolation
+            sessionStorage.setItem("foodFusionUser", JSON.stringify(userData));
 
             // Update global state
             setUser(userData);
@@ -57,11 +85,13 @@ const LoginPage = () => {
 
             // Redirect based on role
             if (role === "customer") {
-                navigate("/customer/dashboard");
+                navigate("/");
             } else if (role === "restaurant") {
                 navigate("/restaurant/dashboard");
+            } else if (role === "delivery") {
+                navigate("/delivery-dashboard");
             } else {
-                navigate("/delivery/dashboard");
+                navigate("/admin");
             }
         } catch (error: any) {
             setLoginError(error.response?.data?.message || "Login failed");
@@ -72,7 +102,7 @@ const LoginPage = () => {
     };
 
     // Helper to render the form for each role
-    const renderForm = (roleLabel: string, roleValue: UserRole) => (
+    const renderForm = (roleLabel: string, roleValue: UserRole | "admin") => (
         <form onSubmit={handleLogin}>
             <div className="space-y-4">
                 {loginError && (
@@ -94,17 +124,20 @@ const LoginPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        autoComplete={roleValue === "admin" ? "username" : undefined}
                     />
                 </div>
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor={`${roleValue}-password`}>Password</Label>
-                        <Link
-                            to="/forgot-password"
-                            className="text-sm text-primary underline-offset-4 hover:underline"
-                        >
-                            Forgot password?
-                        </Link>
+                        {roleValue !== "admin" && (
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm text-primary underline-offset-4 hover:underline"
+                            >
+                                Forgot password?
+                            </Link>
+                        )}
                     </div>
                     <Input
                         id={`${roleValue}-password`}
@@ -113,6 +146,7 @@ const LoginPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        autoComplete={roleValue === "admin" ? "current-password" : undefined}
                     />
                 </div>
                 <Button
@@ -136,11 +170,12 @@ const LoginPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs value={role} onValueChange={(value) => setRole(value as UserRole)}>
-                        <TabsList className="grid grid-cols-3 mb-6">
+                    <Tabs value={role} onValueChange={(value) => setRole(value as UserRole | "admin")}>
+                        <TabsList className="grid grid-cols-4 mb-6">
                             <TabsTrigger value="customer">Customer</TabsTrigger>
                             <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
                             <TabsTrigger value="delivery">Delivery</TabsTrigger>
+                            <TabsTrigger value="admin">Admin</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="customer">
@@ -152,13 +187,24 @@ const LoginPage = () => {
                         <TabsContent value="delivery">
                             {renderForm("Delivery", "delivery")}
                         </TabsContent>
+                        <TabsContent value="admin">
+                            {renderForm("Admin", "admin")}
+                            <div className="mt-4 text-xs text-muted-foreground text-center">
+                                <div>
+                                    <span className="font-semibold">Username:</span> {ADMIN_USERNAME}
+                                </div>
+                                <div>
+                                    <span className="font-semibold">Password:</span> {ADMIN_PASSWORD}
+                                </div>
+                            </div>
+                        </TabsContent>
                     </Tabs>
                 </CardContent>
                 <CardFooter className="flex justify-center">
                     <div className="text-sm text-muted-foreground">
                         Don't have an account?{" "}
                         <Link
-                            to={`/register${role ? `?role=${role}` : ""}`}
+                            to={`/register${role && role !== "admin" ? `?role=${role}` : ""}`}
                             className="text-primary underline-offset-4 hover:underline font-medium"
                         >
                             Sign up

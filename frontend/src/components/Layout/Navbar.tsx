@@ -24,6 +24,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import NotificationBell from "@/components/Notification/NotificationBell";
+import { 
+  Users, ShieldCheck, Building2, CreditCard, Bell, Gauge,
+  Sun, Moon
+} from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -41,12 +46,11 @@ const Navbar = () => {
       { name: "Orders", path: "/orders", icon: <Package className="h-4 w-4 mr-2" /> },
     ],
     restaurant: [
-      { name: "Dashboard", path: "/restaurant/dashboard", icon: <Utensils className="h-4 w-4 mr-2" /> },
-      { name: "Menu", path: "/restaurant/menu", icon: <Utensils className="h-4 w-4 mr-2" /> },
-      { name: "Orders", path: "/restaurant/orders", icon: <Package className="h-4 w-4 mr-2" /> },
+      { name: "Dashboard", path: "/restaurant/dashboard", icon: <Gauge className="h-4 w-4 mr-2" /> },
+      
     ],
     delivery: [
-      { name: "Deliveries", path: "/delivery/dashboard", icon: <Package className="h-4 w-4 mr-2" /> },
+      { name: "Dashboard", path: "/delivery/dashboard", icon: <Gauge className="h-4 w-4 mr-2" /> },
     ],
   };
 
@@ -65,6 +69,7 @@ const Navbar = () => {
   };
 
   const itemCount = getItemCount();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -73,6 +78,15 @@ const Navbar = () => {
           <Link to="/" className="flex items-center">
             <span className="text-xl font-bold text-primary">FoodFusion</span>
           </Link>
+          <div>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-md hover:bg-gray-800 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+          </div>
           
         </div>
 

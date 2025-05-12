@@ -27,6 +27,8 @@ import AdminRestaurantsPage from "@/pages/admin/AdminRestaurantsPage";
 import AdminFinancesPage from "@/pages/admin/AdminFinancesPage";
 import AdminNotificationsPage from "@/pages/admin/AdminNotificationsPage";
 import NotFound from "./pages/NotFound";
+import RestaurantDashboard from './pages/RestaurantDashboard';
+import DeliveryDashboard from "./pages/DeliveryDashboard";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +53,8 @@ const App = () => (
                     <Route path="/profile" element={<MainLayout><ProfilePage /></MainLayout>} />
                     <Route path="/orders" element={<MainLayout><OrdersPage /></MainLayout>} />
                     <Route path="/notifications-test" element={<MainLayout><NotificationsTestPage /></MainLayout>} />
-                    
+                    <Route path="/restaurant/dashboard" element={<MainLayout><RestaurantDashboard /></MainLayout>} />
+                    <Route path="/delivery-dashboard" element={<MainLayout><DeliveryDashboard /></MainLayout>} />
                     {/* Admin Routes */}
                     <Route path="/admin" element={<MainLayout><AdminDashboardPage /></MainLayout>} />
                     <Route path="/admin/users" element={<MainLayout><AdminUsersPage /></MainLayout>} />

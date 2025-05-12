@@ -1,8 +1,7 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 
-export type UserRole = "customer" | "restaurant" | "delivery" | null;
+export type UserRole = "customer" | "restaurant" | "delivery" | "admin" | null;
 
 interface User {
   id: string;
@@ -28,7 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("foodFusionUser");
+    // Use sessionStorage for tab-isolated auth
+    const storedUser = sessionStorage.getItem("foodFusionUser");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
@@ -37,15 +37,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string, role: UserRole): Promise<void> => {
-    // Optional: Remove mock login if using real backend
+    // This will be handled in the LoginPage (see below)
   };
 
   const register = async (name: string, email: string, password: string, role: UserRole): Promise<void> => {
-    // Optional: Remove mock register if using real backend
+    // This will be handled elsewhere
   };
 
   const logout = () => {
-    localStorage.removeItem("foodFusionUser");
+    sessionStorage.removeItem("foodFusionUser");
     setUser(null);
     setIsAuthenticated(false);
     toast.success("Logged out successfully");

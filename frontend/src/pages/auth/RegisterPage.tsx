@@ -23,13 +23,24 @@ const RegisterPage = () => {
         e.preventDefault();
         setError("");
 
-        if (!name || !email || !password || !confirmPassword) {
-            setError("Please fill in all fields");
+        // Advanced user-friendly validations
+        if (!/^[a-zA-Z\s]{2,50}$/.test(name)) {
+            setError("Please enter a valid name (letters only, 2–50 characters).");
             return;
         }
-
+        if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+        // Password: min 8 chars, at least one number, one uppercase, one lowercase, one special char
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password)) {
+            setError(
+                "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+            );
+            return;
+        }
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setError("Passwords do not match.");
             return;
         }
 
